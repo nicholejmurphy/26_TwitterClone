@@ -113,7 +113,7 @@ def login():
 def logout():
     """Handle logout of user."""
 
-    session.pop(CURR_USER_KEY)
+    do_logout()
     flash('Successfully logged out.', 'success')
 
     return redirect('/login')
@@ -320,6 +320,7 @@ def homepage():
     if g.user:
         messages = (Message
                     .query
+                    .filter_by(user_id=int(g.user.id))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
