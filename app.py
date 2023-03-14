@@ -218,10 +218,11 @@ def profile():
     form = UserUpdateForm(obj=user)
 
     if form.validate_on_submit():
-        if User.authenticate(user.username, form.password.data):
-            import pdb
-            pdb.set_trace()
+        valid_user = User.authenticate(
+            username=user.username, password=form.password.data)
 
+        if valid_user:
+            user = User.query.get_or_404(session[CURR_USER_KEY])
             user.username = form.username.data
             user.email = form.email.data
             user.image_url = form.image_url.data
@@ -234,7 +235,7 @@ def profile():
             return redirect(f'/users/{user.id}')
         else:
             flash('Invalid password. User was not successfully updated.', 'danger')
-            return render_template('users/edit.html', form=form)
+            return redirect('/users/profile')
 
     return render_template('users/edit.html', form=form)
 
