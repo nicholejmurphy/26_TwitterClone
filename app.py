@@ -176,8 +176,7 @@ def users_followers(user_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    user = User.query.get_or_404(user_id)
-    return render_template('users/followers.html', user=user)
+    return render_template('users/followers.html', user=g.user)
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
@@ -210,11 +209,19 @@ def stop_following(follow_id):
     return redirect(f"/users/{g.user.id}/following")
 
 
+@app.route('/users/add_like/<int:msg_id>', methods=["POST"])
+def add_likes(msg_id):
+    """Shows list of liked messages"""
+
+    msg = Message.query.get_or_404(msg_id)
+    user = g.user
+
+
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
     """Update profile for current user."""
 
-    user = User.query.get_or_404(session[CURR_USER_KEY])
+    user = g.user
     form = UserUpdateForm(obj=user)
 
     if form.validate_on_submit():
@@ -222,7 +229,7 @@ def profile():
             username=user.username, password=form.password.data)
 
         if valid_user:
-            user = User.query.get_or_404(session[CURR_USER_KEY])
+            user = g.user
             user.username = form.username.data
             user.email = form.email.data
             user.image_url = form.image_url.data
