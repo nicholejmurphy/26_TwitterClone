@@ -18,7 +18,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 toolbar = DebugToolbarExtension(app)
 
@@ -216,6 +216,30 @@ def add_likes(msg_id):
     msg = Message.query.get_or_404(msg_id)
     user = g.user
 
+    if msg.user_id == user.id:
+        flash("Cannot like your own warbles!", "warning")
+        return redirect("/")
+
+    if msg in user.likes:
+        flash("Successfully unliked warble.", "success")
+        user.likes = [like for like in user.likes if like != msg]
+    else:
+        flash("Successfully liked warble.", "success")
+        user.likes.append(msg)
+
+    db.session.commit()
+
+    return redirect("/")
+
+
+@app.route('/users/<int:user_id>/likes', methods=["GET"])
+def show_likes(user_id):
+    """Show a message."""
+
+    user = User.query.get_or_404(user_id)
+
+    return render_template('messages/show_likes.html', messages=user.likes, user=user)
+
 
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
@@ -293,7 +317,7 @@ def messages_add():
 def messages_show(message_id):
     """Show a message."""
 
-    msg = Message.query.get(message_id)
+    msg = Message.query.filter_by(id=message_id).all()
     return render_template('messages/show.html', message=msg)
 
 
