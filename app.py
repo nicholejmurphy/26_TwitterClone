@@ -317,8 +317,8 @@ def messages_add():
 def messages_show(message_id):
     """Show a message."""
 
-    msg = Message.query.filter_by(id=message_id).all()
-    return render_template('messages/show.html', message=msg)
+    message = Message.query.get(message_id)
+    return render_template('messages/show.html', message=message)
 
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
