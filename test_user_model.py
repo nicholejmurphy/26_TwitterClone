@@ -64,6 +64,8 @@ class UserModelTestCase(TestCase):
         db.session.rollback()
         return res
 
+    def test_user_model(self):
+        """Does user model work?"""
         u = User(
             email="test@test.com",
             username="testuser",
